@@ -8,7 +8,8 @@ import 'package:topicos_app1/features/presentation/historial/screens/home.screen
 class GeneralesService {
   static final Dio _dio = Dio(
     BaseOptions(
-      baseUrl: 'http://172.20.10.2:5001', // Reemplaza con la URL de tu backend
+      baseUrl:
+          'http://192.168.1.107:5001', // Reemplaza con la URL de tu backend
     ),
   );
 
@@ -180,6 +181,58 @@ class GeneralesService {
     } catch (e) {
       // Otros errores
       debugPrint('Error inesperado al enviar consulta: $e');
+      throw Exception('Error inesperado: $e');
+    }
+  }
+
+  /// Obtiene todos los fragmentos de la base de conocimiento
+  ///
+  /// Retorna una lista de fragmentos con su ID y contenido
+  static Future<List<Map<String, dynamic>>> obtenerBaseConocimiento() async {
+    try {
+      // Realizar la petición GET
+      final response = await _dio.get(
+        '/api/base_conocimiento',
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      // Verificar respuesta
+      if (response.statusCode == 200) {
+        // La respuesta debe ser una lista de tuplas (id, contenido)
+        final List<dynamic> data = response.data;
+
+        // Convertir los datos a un formato más amigable para Flutter
+        final List<Map<String, dynamic>> fragmentos =
+            data.map((fragmento) {
+              // Cada fragmento es una lista donde el primer elemento es el ID
+              // y el segundo elemento es el contenido
+              return {'id': fragmento[0], 'contenido': fragmento[1]};
+            }).toList();
+
+        return fragmentos;
+      } else {
+        throw Exception(
+          'Error en la respuesta del servidor: ${response.statusCode}',
+        );
+      }
+    } on DioException catch (e) {
+      // Manejo de errores específicos de Dio
+      String mensaje = 'Error de conexión';
+      if (e.response != null) {
+        // El servidor respondió con un código de error
+        mensaje =
+            e.response?.data?['error'] ??
+            'Error del servidor: ${e.response?.statusCode}';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        mensaje = 'Tiempo de conexión agotado';
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        mensaje = 'Tiempo de respuesta agotado';
+      }
+      debugPrint('Error al obtener base de conocimiento: $mensaje');
+      throw Exception(mensaje);
+    } catch (e) {
+      // Otros errores
+      debugPrint('Error inesperado al obtener base de conocimiento: $e');
       throw Exception('Error inesperado: $e');
     }
   }

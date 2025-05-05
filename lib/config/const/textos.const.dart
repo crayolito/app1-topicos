@@ -100,4 +100,47 @@ class Textos {
     color: colorCuaternario,
     fontWeight: FontWeight.w500,
   );
+
+  // CHATS SCREEN
+
+  TextStyle get textoChatsScreen => GoogleFonts.kanit(
+    fontSize: size.width * 0.1,
+    color: colorCuaternario,
+    fontWeight: FontWeight.w600,
+  );
+
+  TextStyle get texto2ChatsScreen => GoogleFonts.kanit(
+    fontSize: size.width * 0.05,
+    color: colorCuaternario,
+    fontWeight: FontWeight.w500,
+  );
+
+  TextStyle get texto3ChatsScreen =>
+      GoogleFonts.kanit(fontSize: size.width * 0.04, color: colorPrimario);
+
+  TextStyle get texto4ChatsScreen => GoogleFonts.kanit(
+    fontSize: size.width * 0.04,
+    color: colorPrimario,
+    fontWeight: FontWeight.w500,
+  );
+
+  // BUSQUEDA SCREEN
+
+  TextStyle get textoBusquedaScreen =>
+      GoogleFonts.kanit(fontSize: size.width * 0.04, color: colorCuaternario);
+
+  TextStyle get texto2BusquedaScreen =>
+      GoogleFonts.kanit(fontSize: size.width * 0.06, color: colorSecundario);
+
+  TextStyle get texto3BusquedaScreen => GoogleFonts.kanit(
+    fontSize: size.width * 0.04,
+    color: colorSecundario,
+    fontWeight: FontWeight.w300,
+  );
+
+  TextStyle get texto4BusquedaScreen => GoogleFonts.kanit(
+    fontSize: size.width * 0.035,
+    color: colorPrimario,
+    fontWeight: FontWeight.w500,
+  );
 }

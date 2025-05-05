@@ -55,10 +55,13 @@ dev_dependencies:
     sdk: flutter
   google_speech: ^5.3.0
   http: ^1.3.0
+  path: ^1.9.1
   path_provider: ^2.1.5
+  postgresql2: ^1.7.0
   record: ^6.0.0
   shared_preferences: ^2.5.3
   speech_to_text: ^7.0.0
+  sqflite: ^2.4.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

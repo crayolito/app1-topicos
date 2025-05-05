@@ -5,8 +5,27 @@ import 'package:topicos_app1/config/bloc/chat/chat_bloc.dart';
 import 'package:topicos_app1/config/const/colores.const.dart';
 import 'package:topicos_app1/config/const/initHelpers.const.dart';
 import 'package:topicos_app1/config/router/app.router.dart';
+import 'package:topicos_app1/features/services/basedatos.service.dart';
 
-void main() {
+void main() async {
+  // Es importante llamar a esto antes de cualquier interacción nativa
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inicializar el servicio de base de datos
+  try {
+    final ServicioBaseDatos dbService = ServicioBaseDatos();
+
+    // Solo inicializar la base de datos
+    await dbService.database;
+
+    // No hacemos nada más aquí - la inicialización y carga
+    // de datos se manejan internamente en la clase ServicioBaseDatos
+    print('Base de datos inicializada correctamente');
+  } catch (e) {
+    // Si hay un error, solo lo registramos pero permitimos que la app continúe
+    print('Error al inicializar la base de datos: $e');
+  }
+
   runApp(
     MultiBlocProvider(
       providers: [BlocProvider(create: (context) => ChatBloc())],
