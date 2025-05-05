@@ -4,6 +4,7 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:topicos_app1/config/bloc/chat/chat_bloc.dart';
 import 'package:topicos_app1/config/const/colores.const.dart';
@@ -660,7 +661,9 @@ class BarraNavegacion extends StatelessWidget {
         children: [
           IconButton(
             icon: Icon(Icons.arrow_back_outlined, size: size.width * 0.09),
-            onPressed: () {},
+            onPressed: () {
+              context.replace('/chats');
+            },
             color: colorPrimario,
           ),
           Text.rich(

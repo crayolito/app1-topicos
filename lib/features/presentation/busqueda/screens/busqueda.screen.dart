@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:topicos_app1/config/const/generalizador.const.dart';
 import 'package:topicos_app1/features/services/basedatos.service.dart';
 
@@ -182,7 +183,8 @@ class _BusquedaScreenState extends State<BusquedaScreen> {
                         ),
                         onPressed: () {
                           // Acción para volver atrás
-                          Navigator.pop(context);
+                          // Navigator.pop(context);
+                          context.replace('/chats');
                         },
                       ),
                       // Espacio entre el icono y el TextField

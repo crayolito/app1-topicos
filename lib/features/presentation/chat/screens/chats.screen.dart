@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:topicos_app1/config/const/colores.const.dart';
 import 'package:topicos_app1/config/const/generalizador.const.dart';
 
@@ -92,14 +93,18 @@ class ChatsScreen extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: Icon(Icons.menu, size: size.width * 0.09),
-                      onPressed: () {},
+                      onPressed: () {
+                        context.replace("/busqueda");
+                      },
                       color: colorPrimario,
                     ),
                     Row(
                       children: [
                         IconButton(
                           icon: Icon(Icons.search, size: size.width * 0.09),
-                          onPressed: () {},
+                          onPressed: () {
+                            context.replace("/busqueda");
+                          },
                           color: colorPrimario,
                         ),
                         Image.asset(
@@ -118,26 +123,31 @@ class ChatsScreen extends StatelessWidget {
             Positioned(
               bottom: size.height * 0.02,
               right: size.width * 0.05,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: size.width * 0.03,
-                  vertical: size.height * 0.01,
-                ),
-                height: 56,
-                decoration: BoxDecoration(
-                  color: colorCuaternario,
-                  borderRadius: BorderRadius.circular(28),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.add_comment_rounded,
-                      size: size.width * 0.08,
-                      color: colorPrimario,
-                    ),
-                    SizedBox(width: size.width * 0.02),
-                    Text("Nuevo Chat", style: textos.texto4ChatsScreen),
-                  ],
+              child: GestureDetector(
+                onTap: () {
+                  context.replace("/chat");
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.03,
+                    vertical: size.height * 0.01,
+                  ),
+                  height: 56,
+                  decoration: BoxDecoration(
+                    color: colorCuaternario,
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.add_comment_rounded,
+                        size: size.width * 0.08,
+                        color: colorPrimario,
+                      ),
+                      SizedBox(width: size.width * 0.02),
+                      Text("Nuevo Chat", style: textos.texto4ChatsScreen),
+                    ],
+                  ),
                 ),
               ),
             ),
