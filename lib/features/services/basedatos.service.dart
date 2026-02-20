@@ -193,63 +193,55 @@ class ServicioBaseDatos {
       // Asegurar que la base de datos tenga datos
       await _verificarYCargarFragmentos();
 
-      final Database db = await database;
-
-      // Preparar el query para búsqueda insensible a mayúsculas/minúsculas
-      // y admitir coincidencia parcial
+      // Normalizar la consulta del usuario
       String queryNormalizado = _normalizarTexto(query);
 
-      // Usar LIKE con % para buscar coincidencias parciales
-      final List<Map<String, dynamic>> maps = await db.rawQuery(
-        '''
-        SELECT id, texto 
-        FROM fragmentos 
-        WHERE texto LIKE ?
-      ''',
-        ['%$queryNormalizado%'],
+      if (queryNormalizado.isEmpty) {
+        return [];
+      }
+
+      final Database db = await database;
+
+      // Obtener todos los fragmentos para búsqueda normalizada
+      final List<Map<String, dynamic>> allFragments = await db.query(
+        'fragmentos',
       );
 
-      // Si no hay resultados con la búsqueda exacta, intentar búsqueda más flexible
-      if (maps.isEmpty) {
-        // Obtener todos los fragmentos para búsqueda manual más flexible
-        final List<Map<String, dynamic>> allFragments = await db.query(
-          'fragmentos',
-        );
+      // Lista para almacenar los resultados coincidentes
+      List<Map<String, dynamic>> resultados = [];
 
-        // Dividir la consulta en palabras clave
-        List<String> keywords =
-            queryNormalizado
-                .split(' ')
-                .where((keyword) => keyword.isNotEmpty)
-                .toList();
+      // Dividir la consulta en palabras clave
+      List<String> keywords =
+          queryNormalizado
+              .split(' ')
+              .where((keyword) => keyword.isNotEmpty)
+              .toList();
 
-        // Filtrar fragmentos que contengan al menos una palabra clave
-        List<Map<String, dynamic>> resultados = [];
+      for (var fragmento in allFragments) {
+        // Normalizar el texto del fragmento
+        String textoNormalizado = _normalizarTexto(fragmento['texto']);
 
-        for (var fragmento in allFragments) {
-          String textoNormalizado = _normalizarTexto(fragmento['texto']);
+        // Verificar si el fragmento contiene la consulta normalizada completa
+        if (textoNormalizado.contains(queryNormalizado)) {
+          resultados.add(fragmento);
+          continue;
+        }
 
-          // Verificar si el fragmento contiene al menos una palabra clave
-          bool contienePalabraClave = keywords.any(
-            (keyword) => textoNormalizado.contains(keyword),
-          );
-
-          if (contienePalabraClave) {
-            resultados.add(fragmento);
+        // Si no hay coincidencia exacta, verificar coincidencia con palabras clave
+        int coincidencias = 0;
+        for (var keyword in keywords) {
+          if (textoNormalizado.contains(keyword)) {
+            coincidencias++;
           }
         }
 
-        return resultados
-            .map(
-              (map) => FragmentoTexto.fromMap({
-                'id': map['id'],
-                'texto': map['texto'],
-              }),
-            )
-            .toList();
+        // Si hay al menos una coincidencia con palabras clave, agregar a resultados
+        if (coincidencias > 0 && keywords.isNotEmpty) {
+          resultados.add(fragmento);
+        }
       }
 
-      return maps
+      return resultados
           .map(
             (map) => FragmentoTexto.fromMap({
               'id': map['id'],
@@ -265,42 +257,80 @@ class ServicioBaseDatos {
 
   // Método auxiliar para normalizar texto (eliminar acentos, convertir a minúsculas)
   String _normalizarTexto(String texto) {
-    if (texto == null) return '';
+    if (texto == null || texto.isEmpty) return '';
 
     // Convertir a minúsculas
     String resultado = texto.toLowerCase();
-
     // Reemplazar caracteres acentuados
     Map<String, String> acentos = {
-      'á': 'a',
-      'é': 'e',
-      'í': 'i',
-      'ó': 'o',
-      'ú': 'u',
-      'à': 'a',
-      'è': 'e',
-      'ì': 'i',
-      'ò': 'o',
-      'ù': 'u',
-      'ä': 'a',
-      'ë': 'e',
-      'ï': 'i',
-      'ö': 'o',
-      'ü': 'u',
-      'â': 'a',
-      'ê': 'e',
-      'î': 'i',
-      'ô': 'o',
-      'û': 'u',
-      'ñ': 'n',
+      // Minúsculas con acentos y diacríticos
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+      'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+      'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+      'ã': 'a', 'ẽ': 'e', 'ĩ': 'i', 'õ': 'o', 'ũ': 'u',
+      'å': 'a', 'ç': 'c', 'č': 'c', 'ć': 'c', 'đ': 'd',
+      'ð': 'd', 'ē': 'e', 'ė': 'e', 'ę': 'e', 'ģ': 'g',
+      'ğ': 'g', 'ķ': 'k', 'ļ': 'l', 'ł': 'l', 'ñ': 'n',
+      'ń': 'n', 'ņ': 'n', 'ň': 'n', 'ř': 'r', 'ś': 's',
+      'ş': 's', 'š': 's', 'ţ': 't', 'ť': 't', 'ý': 'y',
+      'ÿ': 'y', 'ź': 'z', 'ż': 'z', 'ž': 'z', 'þ': 'th',
+      'æ': 'ae', 'œ': 'oe', 'ß': 'ss',
+
+      // Mayúsculas con acentos y diacríticos
+      'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+      'À': 'A', 'È': 'E', 'Ì': 'I', 'Ò': 'O', 'Ù': 'U',
+      'Ä': 'A', 'Ë': 'E', 'Ï': 'I', 'Ö': 'O', 'Ü': 'U',
+      'Â': 'A', 'Ê': 'E', 'Î': 'I', 'Ô': 'O', 'Û': 'U',
+      'Ã': 'A', 'Ẽ': 'E', 'Ĩ': 'I', 'Õ': 'O', 'Ũ': 'U',
+      'Å': 'A', 'Ç': 'C', 'Č': 'C', 'Ć': 'C', 'Đ': 'D',
+      'Ð': 'D', 'Ē': 'E', 'Ė': 'E', 'Ę': 'E', 'Ģ': 'G',
+      'Ğ': 'G', 'Ķ': 'K', 'Ļ': 'L', 'Ł': 'L', 'Ñ': 'N',
+      'Ń': 'N', 'Ņ': 'N', 'Ň': 'N', 'Ř': 'R', 'Ś': 'S',
+      'Ş': 'S', 'Š': 'S', 'Ţ': 'T', 'Ť': 'T', 'Ý': 'Y',
+      'Ÿ': 'Y', 'Ź': 'Z', 'Ż': 'Z', 'Ž': 'Z', 'Þ': 'TH',
+      'Æ': 'AE', 'Œ': 'OE',
+
+      // Símbolos y signos
+      '&': 'and', '@': 'at', '©': 'c', '®': 'r', '™': 'tm',
+      '€': 'euro', '£': 'pound', '¥': 'yen', '\$': 'dollar',
+      '¢': 'cent', '₽': 'ruble', '₹': 'rupee', '₩': 'won',
+      '°': 'degree', '№': 'number', '℗': 'p', '℠': 'sm',
+
+      // Signos de puntuación y espacios
+      ' ': '-', ',': '', '.': '', ':': '-', ';': '-',
+      '!': '', '¡': '', '?': '', '¿': '', "'": '',
+      '"': '', '(': '', ')': '', '[': '', ']': '',
+      '{': '', '}': '', '/': '-', '\\': '-', '|': '-',
+      '+': 'plus', '*': '', '=': 'equals', '<': 'less',
+      '>': 'greater', '_': '-', '~': '', '`': '',
+      '#': 'number', '%': 'percent', '^': '', '·': '',
+      '•': '', '−': '-', '–': '-', '—': '-', '…': '',
+
+      // Caracteres matemáticos y otros especiales
+      '½': 'half', '¼': 'quarter', '¾': 'three-quarters',
+      '⁄': 'fraction', '≠': 'not-equal', '≤': 'less-or-equal',
+      '≥': 'greater-or-equal', '÷': 'divided-by', '×': 'times',
+      '∞': 'infinity', '∑': 'sum', '∏': 'product',
+      '∂': 'partial', '∫': 'integral', '√': 'square-root',
+      '≈': 'approximately', '≡': 'identical', '≝': 'equal-by-def',
+      '∈': 'element-of', '∉': 'not-element-of', '⊂': 'subset',
+      '⊃': 'superset', '∩': 'intersection', '∪': 'union',
+
+      // Símbolos de varios idiomas
+      'ø': 'o', 'Ø': 'O', 'µ': 'u', '¬': 'not',
+      '¦': 'broken-bar', '¨': '', '´': '', '¸': '',
+      '¹': '1', '²': '2', '³': '3', 'ª': 'a', 'º': 'o',
     };
 
     acentos.forEach((key, value) {
       resultado = resultado.replaceAll(key, value);
     });
 
-    // Eliminar caracteres especiales y espacios extras
-    resultado = resultado.replaceAll(RegExp(r'[^\w\s]'), '');
+    // Para búsqueda, es mejor preservar espacios y solo eliminar puntuación
+    resultado = resultado.replaceAll(RegExp(r'[^\w\s]'), ' ');
+
+    // Normalizar espacios
     resultado = resultado.replaceAll(RegExp(r'\s+'), ' ').trim();
 
     return resultado;

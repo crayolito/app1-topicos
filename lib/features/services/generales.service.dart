@@ -9,7 +9,7 @@ class GeneralesService {
   static final Dio _dio = Dio(
     BaseOptions(
       baseUrl:
-          'http://192.168.1.107:5001', // Reemplaza con la URL de tu backend
+          'https://10ad-190-171-228-246.ngrok-free.app', // Reemplaza con la URL de tu backend
     ),
   );
 
